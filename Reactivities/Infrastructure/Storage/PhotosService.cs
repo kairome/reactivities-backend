@@ -27,7 +27,7 @@ namespace Infrastructure.Storage
             var uploadParams = new ImageUploadParams
             {
                 File = new FileDescription(file.FileName, stream),
-                Transformation = new Transformation().Width(200).Height(200).Crop("fill").Radius(20),
+                Transformation = new Transformation().Width(200).Height(200).Crop("fill"),
             };
 
             var uploadResult = await _cloudinary.Account.UploadAsync(uploadParams);

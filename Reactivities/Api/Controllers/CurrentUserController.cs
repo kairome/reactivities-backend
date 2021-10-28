@@ -14,16 +14,19 @@ namespace Api.Controllers
         private readonly ICurrentUserIdentity _currentUserIdentity;
         private readonly IWriteUsersService _writeUsersService;
         private readonly IPhotosService _photosService;
+        private readonly IGetUsersService _getUsersService;
 
         public CurrentUserController(
             ICurrentUserIdentity currentUserIdentity,
             IWriteUsersService writeUsersService,
-            IPhotosService photosService
+            IPhotosService photosService,
+            IGetUsersService getUsersService
         )
         {
             _currentUserIdentity = currentUserIdentity;
             _writeUsersService = writeUsersService;
             _photosService = photosService;
+            _getUsersService = getUsersService;
         }
 
         [HttpGet]
@@ -41,7 +44,7 @@ namespace Api.Controllers
             var newUser = await _writeUsersService.AddProfilePhoto(currentUser.Id, new Photo(photoResult));
             return new UserDto(newUser);
         }
-        
+
         [HttpDelete("photo/{id}")]
         public async Task<UserDto> AddPhoto(string id)
         {
@@ -56,7 +59,7 @@ namespace Api.Controllers
             {
                 throw new BadRequest("Photo with this id does not exist!");
             }
-            
+
             await _photosService.DeletePhoto(id);
             var newUser = await _writeUsersService.DeletePhoto(currentUser.Id, id);
             return new UserDto(newUser);
@@ -86,6 +89,13 @@ namespace Api.Controllers
         public async Task<UserDto> UpdateUser(UpdateUserDto dto)
         {
             var currentUser = await _currentUserIdentity.GetCurrentUser();
+            var existingUsers = await _getUsersService.GetUsersByNameOrEmail(null, dto.Email);
+            var validEmail = existingUsers.Count == 0 || existingUsers.Count == 1 && existingUsers[0].Id == currentUser.Id;
+            if (!validEmail)
+            {
+                throw new BadRequest("User with this email already exists");
+            }
+
             var updatedUser = await _writeUsersService.UpdateUserInfo(currentUser.Id, dto);
 
             return new UserDto(updatedUser);
