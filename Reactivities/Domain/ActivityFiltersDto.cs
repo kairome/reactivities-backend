@@ -18,5 +18,6 @@ namespace Domain
         public List<string> Categories { get; set; } = new List<string>();
         public List<string> Cities { get; set; } = new List<string>();
         public bool? IsMy { get; set; }
+        public bool? Attending { get; set; }
     }
 }

@@ -66,6 +66,11 @@ namespace Application.Activities
                 filters.Add(Filter.Eq(x => x.AuthorId, userId)); 
             }
 
+            if (filtersDto.Attending.HasValue && filtersDto.Attending.Value)
+            {
+                filters.Add(Filter.ElemMatch(x => x.Attendees, a => a.UserId == userId));
+            }
+
             return await GetAll(Filter.And(filters), sort);
         }
 

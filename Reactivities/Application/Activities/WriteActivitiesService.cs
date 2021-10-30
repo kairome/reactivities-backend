@@ -85,7 +85,6 @@ namespace Application.Activities
             {
                 UserId = user.Id,
                 Name = user.DisplayName,
-                PhotoUrl = user.ProfilePhoto?.Url,
             };
             return await UpdateOne(Filter.Eq(x => x.Id, activityId), Update.Push(x => x.Attendees, newAttendee));
         }

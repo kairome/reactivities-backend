@@ -40,8 +40,7 @@ namespace Migrator.Migrate
                     return new ActivityAttendee
                     {
                         UserId = attendee?.Id,
-                        Name = attendee?.DisplayName,
-                        PhotoUrl = attendee?.ProfilePhoto?.Url,
+                        Name = attendee?.DisplayName
                     };
                 });
 
