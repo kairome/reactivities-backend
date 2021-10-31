@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Application.Activities;
 using Application.Core;
+using Application.Users;
 using Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,16 +16,19 @@ namespace Api.Controllers
         private readonly IGetActivitiesService _getActivitiesService;
         private readonly IWriteActivitiesService _writeActivitiesService;
         private readonly ICurrentUserIdentity _currentUserIdentity;
+        private readonly IGetUsersService _getUsersService;
 
         public ActivitiesController(
             IGetActivitiesService getActivitiesService,
             IWriteActivitiesService writeActivitiesService,
-            ICurrentUserIdentity currentUserIdentity
+            ICurrentUserIdentity currentUserIdentity,
+            IGetUsersService getUsersService
         )
         {
             _getActivitiesService = getActivitiesService;
             _writeActivitiesService = writeActivitiesService;
             _currentUserIdentity = currentUserIdentity;
+            _getUsersService = getUsersService;
         }
 
         [HttpGet]
@@ -35,11 +39,26 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Activity>> GetActivity(string id)
+        public async Task<ActionResult<ActivityDto>> GetActivity(string id)
         {
             var result = await _getActivitiesService.GetOneById(id);
 
-            return HandleResult(Result<Activity>.Success(result));
+            if (result == null)
+            {
+                throw new BadRequest("Activity not found");
+            }
+
+            var userIds = result.Comments.Select(x => x.AuthorId).ToList();
+
+            var users = await _getUsersService.GetUsersByIds(userIds);
+
+            var commentDtos = result.Comments.Select(comment =>
+            {
+                var commentUser = users.FirstOrDefault(u => u.Id == comment.AuthorId);
+                return new CommentDto(comment, commentUser?.DisplayName, commentUser?.ProfilePhoto?.Url);
+            }).OrderByDescending(x => x.CreatedAt).ToList();
+
+            return HandleResult(Result<ActivityDto>.Success(new ActivityDto(result, commentDtos)));
         }
 
         [HttpPost]

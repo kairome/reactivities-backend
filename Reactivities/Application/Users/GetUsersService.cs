@@ -12,6 +12,7 @@ namespace Application.Users
     {
         Task<User> GetUserById(string userId);
         Task<List<User>> GetUsersByNameOrEmail(string userName, string email = null);
+        Task<List<User>> GetUsersByIds(List<string> ids);
     }
     
     public class GetUsersService : GetDbOperationsService<User>, IGetUsersService
@@ -38,6 +39,11 @@ namespace Application.Users
             }
 
             return await GetAll(Filter.Or(filters));
+        }
+
+        public async Task<List<User>> GetUsersByIds(List<string> ids)
+        {
+            return await GetAll(Filter.In(x => x.Id, ids));
         }
     }
 }

@@ -1,7 +1,7 @@
 using Api.Extensions;
 using Api.Middleware;
-using Api.SignalrHubs;
 using AspNetCore.ServiceRegistration.Dynamic;
+using Infrastructure.SignalR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -22,8 +22,11 @@ namespace Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApplicationServices(_config);
-            
-            services.AddSignalR();
+
+            services.AddSignalR().AddJsonProtocol(options =>
+            {
+                options.PayloadSerializerOptions.PropertyNamingPolicy = null;
+            });
             services.AddServicesWithAttributeOfType<ScopedServiceAttribute>();
             services.AddSingleton<IMongoClient, MongoClient>((s) =>
                 new MongoClient(_config.GetConnectionString("MongoUri")));
@@ -44,7 +47,7 @@ namespace Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/chat");
+                endpoints.MapHub<ChatHub>("/api/signalr/chat");
             });
         }
     }

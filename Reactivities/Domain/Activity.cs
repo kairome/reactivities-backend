@@ -25,4 +25,25 @@ namespace Domain
         public string UserId { get; set; }
         public string Name { get; set; }
     }
+
+    public class ActivityDto : Activity
+    {
+        public new List<CommentDto> Comments { get; set; }
+
+        public ActivityDto(Activity activity, List<CommentDto> comments)
+        {
+            Id = activity.Id;
+            Title = activity.Title;
+            Description = activity.Description;
+            Category = activity.Category;
+            Date = activity.Date;
+            City = activity.City;
+            Venue = activity.Venue;
+            AuthorId = activity.AuthorId;
+            AuthorName = activity.AuthorName;
+            IsCancelled = activity.IsCancelled;
+            Comments = comments;
+            Attendees = activity.Attendees;
+        }
+    }
 }

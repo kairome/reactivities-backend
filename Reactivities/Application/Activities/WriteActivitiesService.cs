@@ -17,6 +17,7 @@ namespace Application.Activities
         Task<Activity> AddAttendee(string activityId, User user);
         Task<Activity> RemoveAttendee(string activityId, string userId);
         Task<Activity> UpdateActivityActiveStatus(string activityId, bool cancelled);
+        Task AddComment(string activityId, Comment comment);
     }
 
     public class WriteActivitiesService : WriteDbOperationsService<Activity>, IWriteActivitiesService
@@ -98,6 +99,11 @@ namespace Application.Activities
         public async Task<Activity> UpdateActivityActiveStatus(string activityId, bool cancelled)
         {
             return await UpdateOne(Filter.Eq(x => x.Id, activityId), Update.Set(x => x.IsCancelled, cancelled));
+        }
+
+        public async Task AddComment(string activityId, Comment comment)
+        {
+            await UpdateOneById(activityId, Update.Push(x => x.Comments, comment));
         }
     }
 }

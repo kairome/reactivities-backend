@@ -11,6 +11,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="SignalrHubs" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>b401ce8f-f147-4eca-b101-729edf9b2080</UserSecretsId>
