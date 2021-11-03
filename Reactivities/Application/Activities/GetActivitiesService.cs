@@ -30,7 +30,7 @@ namespace Application.Activities
                 ? Sort.Ascending(x => x.Date)
                 : Sort.Descending(x => x.Date);
 
-            return await GetAll(Filter.And(GetActivitiesFilterDefinition(filtersDto, userId)), sort);
+            return await GetAll(GetActivitiesFilters(filtersDto, userId), sort);
         }
 
         public async Task<List<string>> GetCategories()
@@ -45,16 +45,15 @@ namespace Application.Activities
 
         public async Task<long> CountActivitiesByFilter(ActivityFiltersDto filtersDto, string userId)
         {
-            return await CountDocuments(Filter.And(GetActivitiesFilterDefinition(filtersDto, userId)));
+            return await CountDocuments(GetActivitiesFilters(filtersDto, userId));
         }
 
-        private List<FilterDefinition<Activity>> GetActivitiesFilterDefinition(ActivityFiltersDto filtersDto, string userId)
+        private FilterDefinition<Activity> GetActivitiesFilters(
+            ActivityFiltersDto filtersDto, string userId)
         {
+            var filters = new List<FilterDefinition<Activity>>();
 
-            var filters = new List<FilterDefinition<Activity>>
-            {
-                Filter.Empty,
-            };
+            var myActivitiesFilters = new List<FilterDefinition<Activity>>();
 
             if (!string.IsNullOrEmpty(filtersDto.Title))
             {
@@ -77,7 +76,7 @@ namespace Application.Activities
             {
                 filters.Add(Filter.In(x => x.Category, filtersDto.Categories));
             }
-            
+
             if (filtersDto.Cities.Any())
             {
                 filters.Add(Filter.In(x => x.City, filtersDto.Cities));
@@ -85,20 +84,30 @@ namespace Application.Activities
 
             if (filtersDto.IsMy.HasValue && filtersDto.IsMy.Value)
             {
-                filters.Add(Filter.Eq(x => x.AuthorId, userId)); 
+                myActivitiesFilters.Add(Filter.Eq(x => x.AuthorId, userId));
             }
 
             if (filtersDto.Attending.HasValue && filtersDto.Attending.Value)
             {
-                filters.Add(Filter.ElemMatch(x => x.Attendees, a => a.UserId == userId));
+                myActivitiesFilters.Add(Filter.ElemMatch(x => x.Attendees, a => a.UserId == userId));
             }
 
             if (filtersDto.Following.HasValue && filtersDto.Following.Value)
             {
-                filters.Add(Filter.ElemMatch(x => x.Followers, f => f.UserId == userId));
+                myActivitiesFilters.Add(Filter.ElemMatch(x => x.Followers, f => f.UserId == userId));
             }
 
-            return filters;
+            if (filters.Any() && myActivitiesFilters.Any())
+            {
+                return Filter.And(Filter.And(filters), Filter.Or(myActivitiesFilters));
+            }
+            
+            if (filters.Any())
+            {
+                return Filter.And(filters);
+            }
+
+            return myActivitiesFilters.Any() ? Filter.Or(myActivitiesFilters) : Filter.Empty;
         }
     }
 }

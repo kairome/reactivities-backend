@@ -15,4 +15,11 @@ namespace Domain
             Bio = user.Bio;
         }
     }
+
+    public class UserProfileStats
+    {
+        public long ActivitiesHosting { get; set; }
+        public long ActivitiesAttending { get; set; }
+        public long ActivitiesFollowing { get; set; }
+    }
 }

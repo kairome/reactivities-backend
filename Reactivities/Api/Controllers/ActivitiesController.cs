@@ -41,18 +41,6 @@ namespace Api.Controllers
             return await _getActivitiesService.GetActivities(filters, currentUser?.Id);
         }
 
-        [HttpGet("followed-count")]
-        public async Task<long> GetFollowingActivities()
-        {
-            var currentUser = await _currentUserIdentity.GetCurrentUser();
-            var filters = new ActivityFiltersDto
-            {
-                Following = true,
-            };
-
-            return await _getActivitiesService.CountActivitiesByFilter(filters, currentUser.Id);
-        }
-
         [HttpGet("{id}")]
         public async Task<ActionResult<ActivityDto>> GetActivity(string id)
         {
