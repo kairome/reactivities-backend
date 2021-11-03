@@ -11,7 +11,7 @@ namespace Domain
     
     public class ActivityFiltersDto
     {
-        public ActivityDateSort DateSort { get; set; }
+        public ActivityDateSort? DateSort { get; set; }
         public string Title { get; set; }
         public DateTime? DateFrom { get; set; }
         public DateTime? DateTo { get; set; }
@@ -19,5 +19,6 @@ namespace Domain
         public List<string> Cities { get; set; } = new List<string>();
         public bool? IsMy { get; set; }
         public bool? Attending { get; set; }
+        public bool? Following { get; set; }
     }
 }

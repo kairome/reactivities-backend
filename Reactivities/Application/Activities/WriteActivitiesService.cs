@@ -18,6 +18,8 @@ namespace Application.Activities
         Task<Activity> RemoveAttendee(string activityId, string userId);
         Task<Activity> UpdateActivityActiveStatus(string activityId, bool cancelled);
         Task AddComment(string activityId, Comment comment);
+        Task<Activity> AddFollower(string activityId, ActivityFollower follower);
+        Task<Activity> RemoveFollower(string activityId, string userId);
     }
 
     public class WriteActivitiesService : WriteDbOperationsService<Activity>, IWriteActivitiesService
@@ -104,6 +106,16 @@ namespace Application.Activities
         public async Task AddComment(string activityId, Comment comment)
         {
             await UpdateOneById(activityId, Update.Push(x => x.Comments, comment));
+        }
+
+        public async Task<Activity> AddFollower(string activityId, ActivityFollower follower)
+        {
+            return await UpdateOneById(activityId, Update.Push(x => x.Followers, follower));
+        }
+
+        public async Task<Activity> RemoveFollower(string activityId, string userId)
+        {
+            return await UpdateOneById(activityId, Update.PullFilter(x => x.Followers, f => f.UserId == userId));
         }
     }
 }

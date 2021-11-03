@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Domain
 {
@@ -14,6 +15,7 @@ namespace Domain
         public Photo ProfilePhoto { get; set; }
         public string Bio { get; set; }
         public List<Photo> Photos { get; set; } = new();
+        public List<ActivityNotification> Notifications { get; set; } = new();
     }
 
     public class UserDto
@@ -25,6 +27,7 @@ namespace Domain
         public Photo ProfilePhoto { get; set; }
         public List<Photo> Photos { get; set; }
         public string Bio { get; set; }
+        public List<ActivityNotification> Notifications { get; set; }
         
         public UserDto(User user)
         {
@@ -35,6 +38,8 @@ namespace Domain
             ProfilePhoto = user.ProfilePhoto;
             Photos = user.Photos;
             Bio = user.Bio;
+            Notifications = user.Notifications.OrderBy(x => x.IsRead)
+                .ThenByDescending(x => x.CreatedAt).ToList();
         }
     }
 

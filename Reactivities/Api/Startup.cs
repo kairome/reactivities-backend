@@ -48,6 +48,7 @@ namespace Api
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<ChatHub>("/api/signalr/chat");
+                endpoints.MapHub<NotificationHub>("/api/signalr/notifications");
             });
         }
     }

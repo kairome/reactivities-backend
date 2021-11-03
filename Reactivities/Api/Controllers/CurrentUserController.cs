@@ -90,7 +90,8 @@ namespace Api.Controllers
         {
             var currentUser = await _currentUserIdentity.GetCurrentUser();
             var existingUsers = await _getUsersService.GetUsersByNameOrEmail(null, dto.Email);
-            var validEmail = existingUsers.Count == 0 || existingUsers.Count == 1 && existingUsers[0].Id == currentUser.Id;
+            var validEmail = existingUsers.Count == 0 ||
+                             existingUsers.Count == 1 && existingUsers[0].Id == currentUser.Id;
             if (!validEmail)
             {
                 throw new BadRequest("User with this email already exists");

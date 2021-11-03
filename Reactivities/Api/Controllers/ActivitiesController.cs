@@ -17,18 +17,21 @@ namespace Api.Controllers
         private readonly IWriteActivitiesService _writeActivitiesService;
         private readonly ICurrentUserIdentity _currentUserIdentity;
         private readonly IGetUsersService _getUsersService;
+        private readonly IActivityNotificationsService _activityNotificationsService;
 
         public ActivitiesController(
             IGetActivitiesService getActivitiesService,
             IWriteActivitiesService writeActivitiesService,
             ICurrentUserIdentity currentUserIdentity,
-            IGetUsersService getUsersService
+            IGetUsersService getUsersService,
+            IActivityNotificationsService activityNotificationsService
         )
         {
             _getActivitiesService = getActivitiesService;
             _writeActivitiesService = writeActivitiesService;
             _currentUserIdentity = currentUserIdentity;
             _getUsersService = getUsersService;
+            _activityNotificationsService = activityNotificationsService;
         }
 
         [HttpGet]
@@ -36,6 +39,18 @@ namespace Api.Controllers
         {
             var currentUser = await _currentUserIdentity.GetCurrentUser();
             return await _getActivitiesService.GetActivities(filters, currentUser?.Id);
+        }
+
+        [HttpGet("followed-count")]
+        public async Task<long> GetFollowingActivities()
+        {
+            var currentUser = await _currentUserIdentity.GetCurrentUser();
+            var filters = new ActivityFiltersDto
+            {
+                Following = true,
+            };
+
+            return await _getActivitiesService.CountActivitiesByFilter(filters, currentUser.Id);
         }
 
         [HttpGet("{id}")]
@@ -72,7 +87,11 @@ namespace Api.Controllers
         [HttpPut("{id}")]
         public async Task<Activity> UpdateActivity(string id, UpdateActivityDto dto)
         {
-            return await _writeActivitiesService.UpdateActivity(id, dto);
+            var updatedActivity = await _writeActivitiesService.UpdateActivity(id, dto);
+            await _activityNotificationsService.SendActivityUpdateMessage(updatedActivity,
+                ActivityNotificationType.Edited);
+
+            return updatedActivity;
         }
 
         [HttpPut("{id}/attend")]
@@ -127,7 +146,9 @@ namespace Api.Controllers
             }
 
 
-            return await _writeActivitiesService.UpdateActivityActiveStatus(id, false);
+            var updatedActivity = await _writeActivitiesService.UpdateActivityActiveStatus(id, false);
+            await _activityNotificationsService.SendActivityUpdateMessage(activity, ActivityNotificationType.Activated);
+            return updatedActivity;
         }
 
         [Authorize(Policy = "IsActivityAuthor")]
@@ -141,20 +162,81 @@ namespace Api.Controllers
                 throw new BadRequest("Activity does not exist");
             }
 
-            return await _writeActivitiesService.UpdateActivityActiveStatus(id, true);
+            var updatedActivity = await _writeActivitiesService.UpdateActivityActiveStatus(id, true);
+            await _activityNotificationsService.SendActivityUpdateMessage(activity, ActivityNotificationType.Cancelled);
+            return updatedActivity;
         }
 
         [Authorize(Policy = "IsActivityAuthor")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteActivity(string id)
         {
+            var activity = await _getActivitiesService.GetOneById(id);
+
+            if (activity == null)
+            {
+                throw new BadRequest("Activity does not exist");
+            }
+
             var res = await _writeActivitiesService.DeleteActivity(id);
             if (res.IsSuccess)
             {
+                await _activityNotificationsService.SendActivityUpdateMessage(activity,
+                    ActivityNotificationType.Deleted);
                 return Ok();
             }
 
             return HandleResult(res);
+        }
+
+        [HttpPut("{id}/follow")]
+        public async Task<Activity> FollowActivity(string id)
+        {
+            var activity = await _getActivitiesService.GetOneById(id);
+
+            if (activity == null)
+            {
+                throw new BadRequest("Activity does not exist");
+            }
+
+            var currentUser = await _currentUserIdentity.GetCurrentUser();
+
+            var existingFollower = activity.Followers.FirstOrDefault(x => x.UserId == currentUser.Id);
+
+            if (existingFollower != null)
+            {
+                throw new BadRequest("You are already following this activity");
+            }
+
+            var newFollower = new ActivityFollower
+            {
+                UserId = currentUser.Id,
+                Name = currentUser.DisplayName
+            };
+
+            return await _writeActivitiesService.AddFollower(activity.Id, newFollower);
+        }
+
+        [HttpPut("{id}/unfollow")]
+        public async Task<Activity> UnfollowActivity(string id)
+        {
+            var activity = await _getActivitiesService.GetOneById(id);
+
+            if (activity == null)
+            {
+                throw new BadRequest("Activity does not exist");
+            }
+
+            var currentUser = await _currentUserIdentity.GetCurrentUser();
+
+            var existingFollower = activity.Followers.FirstOrDefault(x => x.UserId == currentUser.Id);
+
+            if (existingFollower == null)
+            {
+                throw new BadRequest("You are not following this activity");
+            }
+
+            return await _writeActivitiesService.RemoveFollower(activity.Id, currentUser.Id);
         }
 
         [HttpGet("categories")]

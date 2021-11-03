@@ -10,6 +10,7 @@ namespace Persistence
         Task<List<TDocument>> GetAll(FilterDefinition<TDocument> filters, SortDefinition<TDocument> sort);
         Task<List<TProjection>> GetProjections<TProjection>(ProjectionDefinition<TDocument, TProjection> projection, FilterDefinition<TDocument> filters);
         Task<TDocument> GetOneById(string id);
+        Task<long> CountDocuments(FilterDefinition<TDocument> filters);
     }
 
     public abstract class GetDbOperationsService<TDocument> : IGetDbOperationsService<TDocument>
@@ -43,6 +44,11 @@ namespace Persistence
         public async Task<TDocument> GetOneById(string id)
         {
             return await _collection.Find(Filter.Eq(x => x.Id, id)).FirstOrDefaultAsync();
+        }
+
+        public async Task<long> CountDocuments(FilterDefinition<TDocument> filters)
+        {
+            return await _collection.CountDocumentsAsync(filters);
         }
     }
 }

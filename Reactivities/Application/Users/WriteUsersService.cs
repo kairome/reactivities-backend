@@ -17,6 +17,10 @@ namespace Application.Users
         Task<User> DeletePhoto(string userId, string photoId);
         Task<User> UpdateProfilePhoto(string userId, Photo photo);
         Task<User> UpdateUserInfo(string userId, UpdateUserDto dto);
+        Task AddNotification(string userId, ActivityNotification notification);
+        Task<User> MarkNotificationAsRead(string userId, string notificationId);
+        Task<User> RemoveNotification(string userId, string notificationId);
+        Task<User> ClearAllNotifications(string userId);
     }
 
     public class WriteUsersService : WriteDbOperationsService<User>, IWriteUsersService
@@ -67,6 +71,28 @@ namespace Application.Users
                     .Set(x => x.Bio, dto.Bio)
                     .Set(x => x.Email, dto.Email)
             );
+        }
+
+        public async Task AddNotification(string userId, ActivityNotification notification)
+        {
+            await UpdateOneById(userId, Update.Push(x => x.Notifications, notification));
+        }
+
+        public async Task<User> MarkNotificationAsRead(string userId, string notificationId)
+        {
+            return await UpdateOne(
+                Filter.Eq(x => x.Id, userId) & Filter.ElemMatch(x => x.Notifications, n => n.Id == notificationId),
+                Update.Set(x => x.Notifications[-1].IsRead, true));
+        }
+
+        public async Task<User> RemoveNotification(string userId, string notificationId)
+        {
+            return await UpdateOneById(userId, Update.PullFilter(x => x.Notifications, n => n.Id == notificationId));
+        }
+
+        public async Task<User> ClearAllNotifications(string userId)
+        {
+            return await UpdateOneById(userId, Update.Set(x => x.Notifications, new List<ActivityNotification>()));
         }
     }
 }

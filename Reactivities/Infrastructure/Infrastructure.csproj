@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Application\Application.csproj" />
+    <PackageReference Include="CloudinaryDotNet" Version="1.15.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CloudinaryDotNet" Version="1.15.2" />
+    <ProjectReference Include="..\Application\Application.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

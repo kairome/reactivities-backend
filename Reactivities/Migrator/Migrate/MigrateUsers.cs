@@ -18,21 +18,6 @@ namespace Migrator.Migrate
         public async Task Run()
         {
             Console.WriteLine("Running users migrations...");
-            // await AddBioField();
-        }
-
-        private async Task AddPhotoField()
-        {
-            Console.WriteLine("Adding photo fields to users");
-            await _writeService.UpdateMany(Filter.Empty, Update.Set(x => x.Photos, new List<Photo>()).Set(x => x.ProfilePhoto, null));
-            Console.WriteLine("Photo fields added!");
-        }
-
-        private async Task AddBioField()
-        {
-            Console.WriteLine("Adding bio field to users");
-            await _writeService.UpdateMany(Filter.Empty, Update.Set(x => x.Bio, null));
-
         }
     }
 }

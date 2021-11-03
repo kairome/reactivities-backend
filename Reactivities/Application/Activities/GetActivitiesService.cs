@@ -15,6 +15,7 @@ namespace Application.Activities
         Task<List<Activity>> GetActivities(ActivityFiltersDto filters, string userId);
         Task<List<string>> GetCategories();
         Task<List<string>> GetCities();
+        Task<long> CountActivitiesByFilter(ActivityFiltersDto filtersDto, string userId);
     }
 
     public class GetActivitiesService : GetDbOperationsService<Activity>, IGetActivitiesService
@@ -25,9 +26,30 @@ namespace Application.Activities
 
         public async Task<List<Activity>> GetActivities(ActivityFiltersDto filtersDto, string userId)
         {
-            var sort = filtersDto.DateSort == ActivityDateSort.Asc
+            var sort = filtersDto.DateSort is ActivityDateSort.Asc
                 ? Sort.Ascending(x => x.Date)
                 : Sort.Descending(x => x.Date);
+
+            return await GetAll(Filter.And(GetActivitiesFilterDefinition(filtersDto, userId)), sort);
+        }
+
+        public async Task<List<string>> GetCategories()
+        {
+            return await GetProjections(Projection.Expression(x => x.Category));
+        }
+
+        public async Task<List<string>> GetCities()
+        {
+            return await GetProjections(Projection.Expression(x => x.City));
+        }
+
+        public async Task<long> CountActivitiesByFilter(ActivityFiltersDto filtersDto, string userId)
+        {
+            return await CountDocuments(Filter.And(GetActivitiesFilterDefinition(filtersDto, userId)));
+        }
+
+        private List<FilterDefinition<Activity>> GetActivitiesFilterDefinition(ActivityFiltersDto filtersDto, string userId)
+        {
 
             var filters = new List<FilterDefinition<Activity>>
             {
@@ -71,17 +93,12 @@ namespace Application.Activities
                 filters.Add(Filter.ElemMatch(x => x.Attendees, a => a.UserId == userId));
             }
 
-            return await GetAll(Filter.And(filters), sort);
-        }
+            if (filtersDto.Following.HasValue && filtersDto.Following.Value)
+            {
+                filters.Add(Filter.ElemMatch(x => x.Followers, f => f.UserId == userId));
+            }
 
-        public async Task<List<string>> GetCategories()
-        {
-            return await GetProjections(Projection.Expression(x => x.Category));
-        }
-
-        public async Task<List<string>> GetCities()
-        {
-            return await GetProjections(Projection.Expression(x => x.City));
+            return filters;
         }
     }
 }

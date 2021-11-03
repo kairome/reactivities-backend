@@ -5,18 +5,16 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Infrastructure.SignalR
 {
-    public class ChatService : IChatService
+    public class ChatService : SignalrSender<ChatHub>, IChatService
     {
-        private readonly IHubContext<ChatHub> _hubContext;
 
-        public ChatService(IHubContext<ChatHub> hubContext)
+        public ChatService(IHubContext<ChatHub> hubContext) : base(hubContext)
         {
-            _hubContext = hubContext;
         }
 
         public async Task SendMessage(string activityId, CommentDto comment)
         {
-            await _hubContext.Clients.Group(activityId).SendAsync("newChatMessage", comment);
+            await SendHubMessage(activityId, "newChatMessage", comment);
         }
     }
 }

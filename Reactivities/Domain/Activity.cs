@@ -18,12 +18,18 @@ namespace Domain
 
         public List<Comment> Comments { get; set; } = new();
         public List<ActivityAttendee> Attendees { get; set; } = new();
+        public List<ActivityFollower> Followers { get; set; } = new();
     }
 
     public class ActivityAttendee
     {
         public string UserId { get; set; }
         public string Name { get; set; }
+    }
+
+    public class ActivityFollower : ActivityAttendee
+    {
+        
     }
 
     public class ActivityDto : Activity
@@ -44,6 +50,7 @@ namespace Domain
             IsCancelled = activity.IsCancelled;
             Comments = comments;
             Attendees = activity.Attendees;
+            Followers = activity.Followers;
         }
     }
 }
