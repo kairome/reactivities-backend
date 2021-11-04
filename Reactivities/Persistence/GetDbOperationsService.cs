@@ -11,6 +11,7 @@ namespace Persistence
         Task<List<TProjection>> GetProjections<TProjection>(ProjectionDefinition<TDocument, TProjection> projection, FilterDefinition<TDocument> filters);
         Task<TDocument> GetOneById(string id);
         Task<long> CountDocuments(FilterDefinition<TDocument> filters);
+        Task<List<TDocument>> GetPaginatedList(FilterDefinition<TDocument> filters, SortDefinition<TDocument> sort, int currentPage, int pageSize);
     }
 
     public abstract class GetDbOperationsService<TDocument> : IGetDbOperationsService<TDocument>
@@ -49,6 +50,13 @@ namespace Persistence
         public async Task<long> CountDocuments(FilterDefinition<TDocument> filters)
         {
             return await _collection.CountDocumentsAsync(filters);
+        }
+
+        public async Task<List<TDocument>> GetPaginatedList(FilterDefinition<TDocument> filters, SortDefinition<TDocument> sort, int currentPage, int pageSize)
+        {
+            var find = _collection.Find(filters ?? Filter.Empty).Sort(sort);
+            find.Limit(pageSize).Skip(pageSize * (currentPage - 1));
+            return await find.ToListAsync();
         }
     }
 }

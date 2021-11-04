@@ -16,6 +16,7 @@ namespace Application.Activities
         Task<List<string>> GetCategories();
         Task<List<string>> GetCities();
         Task<long> CountActivitiesByFilter(ActivityFiltersDto filtersDto, string userId);
+        Task<PaginatedList<Activity>> GetPaginatedActivities(PaginatedActivitiesFiltersDto filtersDto, string userId);
     }
 
     public class GetActivitiesService : GetDbOperationsService<Activity>, IGetActivitiesService
@@ -46,6 +47,20 @@ namespace Application.Activities
         public async Task<long> CountActivitiesByFilter(ActivityFiltersDto filtersDto, string userId)
         {
             return await CountDocuments(GetActivitiesFilters(filtersDto, userId));
+        }
+
+        public async Task<PaginatedList<Activity>> GetPaginatedActivities(PaginatedActivitiesFiltersDto filtersDto,
+            string userId)
+        {
+            var mainFilters = GetActivitiesFilters(filtersDto, userId);
+            var sort = filtersDto.DateSort is ActivityDateSort.Asc
+                ? Sort.Ascending(x => x.Date)
+                : Sort.Descending(x => x.Date);
+
+            var activitiesList = await GetPaginatedList(mainFilters, sort, filtersDto.CurrentPage, filtersDto.PageSize);
+            var totalActivities = await CountDocuments(mainFilters);
+            return new PaginatedList<Activity>(activitiesList, filtersDto.CurrentPage, filtersDto.PageSize,
+                (int)totalActivities);
         }
 
         private FilterDefinition<Activity> GetActivitiesFilters(
@@ -101,7 +116,7 @@ namespace Application.Activities
             {
                 return Filter.And(Filter.And(filters), Filter.Or(myActivitiesFilters));
             }
-            
+
             if (filters.Any())
             {
                 return Filter.And(filters);

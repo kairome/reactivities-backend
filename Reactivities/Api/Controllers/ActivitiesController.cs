@@ -35,10 +35,13 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        public async Task<List<Activity>> GetActivities([FromQuery] ActivityFiltersDto filters)
+        public async Task<PaginatedList<ActivityDto>> GetActivities([FromQuery] PaginatedActivitiesFiltersDto filters)
         {
             var currentUser = await _currentUserIdentity.GetCurrentUser();
-            return await _getActivitiesService.GetActivities(filters, currentUser?.Id);
+            var paginatedActivities = await _getActivitiesService.GetPaginatedActivities(filters, currentUser?.Id);
+            var itemsDto = paginatedActivities.Items.Select(x => new ActivityDto(x, new List<CommentDto>())).ToList();
+            return new PaginatedList<ActivityDto>(itemsDto, paginatedActivities.CurrentPage,
+                paginatedActivities.PageSize, paginatedActivities.TotalItems);
         }
 
         [HttpGet("{id}")]
@@ -230,13 +233,15 @@ namespace Api.Controllers
         [HttpGet("categories")]
         public async Task<List<string>> GetCategories()
         {
-            return await _getActivitiesService.GetCategories();
+            var cats = await _getActivitiesService.GetCategories();
+            return cats.Distinct().ToList();
         }
 
         [HttpGet("cities")]
         public async Task<List<string>> GetCities()
         {
-            return await _getActivitiesService.GetCities();
+            var cities = await _getActivitiesService.GetCities();
+            return cities.Distinct().ToList();
         }
     }
 }
