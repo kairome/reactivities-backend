@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Api.Extensions;
 using Api.Middleware;
 using AspNetCore.ServiceRegistration.Dynamic;
@@ -28,9 +29,10 @@ namespace Api
                 options.PayloadSerializerOptions.PropertyNamingPolicy = null;
             });
             services.AddServicesWithAttributeOfType<ScopedServiceAttribute>();
-            services.AddSingleton<IMongoClient, MongoClient>((s) =>
-                new MongoClient(_config.GetConnectionString("MongoUri")));
+
+            services.AddSingleton<IMongoClient, MongoClient>((s) => new MongoClient(_config.GetConnectionString("MongoUri")));
             services.AddSwaggerGen();
+            services.AddStartupTask<DbMigrator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
