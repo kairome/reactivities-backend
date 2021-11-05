@@ -40,6 +40,10 @@ namespace Api
         {
             app.UseMiddleware<ExceptionMiddleware>();
             app.UseRouting();
+
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+            
             app.UseCors("CorsPolicy");
             app.UseSwagger();
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Reactivities API"); });
@@ -51,6 +55,7 @@ namespace Api
                 endpoints.MapControllers();
                 endpoints.MapHub<ChatHub>("/api/signalr/chat");
                 endpoints.MapHub<NotificationHub>("/api/signalr/notifications");
+                endpoints.MapFallbackToController("Index", "Fallback");
             });
         }
     }

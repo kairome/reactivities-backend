@@ -26,9 +26,9 @@ namespace Api.Extensions
                     opts.Filters.Add(new AuthorizeFilter(policy));
                 })
                 .AddJsonOptions(opt => { opt.JsonSerializerOptions.PropertyNamingPolicy = null; })
-                .AddFluentValidation(config =>
+                .AddFluentValidation(fluentConfig =>
                 {
-                    config.RegisterValidatorsFromAssemblyContaining<WriteActivitiesService>();
+                    fluentConfig.RegisterValidatorsFromAssemblyContaining<WriteActivitiesService>();
                 });
 
             services.AddCors(opt =>
