@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Application\Application.csproj" />
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AspNetCore.ServiceRegistration.Dynamic" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="SignalrHubs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\assets\default.jpeg" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\favicon.ico" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\logo192.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\logo512.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\manifest.json" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\robots.txt" />
+    <_ContentIncludedByDefault Remove="wwwroot\css\main.f4390fa683e831152c6d.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\index.html" />
+    <_ContentIncludedByDefault Remove="wwwroot\main.09f801c41b5c1583a594.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\main.09f801c41b5c1583a594.js.LICENSE.txt" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>b401ce8f-f147-4eca-b101-729edf9b2080</UserSecretsId>
+  </PropertyGroup>
+
+
+</Project>
