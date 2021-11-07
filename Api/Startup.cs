@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Api.Extensions;
 using Api.Middleware;
 using AspNetCore.ServiceRegistration.Dynamic;
@@ -55,7 +54,6 @@ namespace Api
                 endpoints.MapControllers();
                 endpoints.MapHub<ChatHub>("/api/signalr/chat");
                 endpoints.MapHub<NotificationHub>("/api/signalr/notifications");
-                endpoints.MapFallbackToController("Index", "Fallback");
             });
         }
     }
