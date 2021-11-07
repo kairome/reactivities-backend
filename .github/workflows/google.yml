@@ -20,7 +20,7 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   GKE_CLUSTER: reactivities
-  GKE_ZONE: eu-west3-b
+  GKE_ZONE: europe-west3-b
   DEPLOYMENT_NAME: backend
   REPO_NAME: reactivities
   IMAGE: backend
