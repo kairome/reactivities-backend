@@ -8,6 +8,4 @@ bld/
 [Bb]in/
 publish/
 [Oo]bj/
-wwwroot/
 /app
-appsettings.Production.json
