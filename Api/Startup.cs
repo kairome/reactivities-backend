@@ -13,7 +13,7 @@ namespace Api
     public class Startup
     {
         private readonly IConfiguration _config;
-        
+
         public Startup(IConfiguration config)
         {
             _config = config;
@@ -29,7 +29,8 @@ namespace Api
             });
             services.AddServicesWithAttributeOfType<ScopedServiceAttribute>();
 
-            services.AddSingleton<IMongoClient, MongoClient>((s) => new MongoClient(_config.GetConnectionString("MongoUri")));
+            services.AddSingleton<IMongoClient, MongoClient>((s) =>
+                new MongoClient(_config.GetConnectionString("MongoUri")));
             services.AddSwaggerGen();
             services.AddStartupTask<DbMigrator>();
         }
@@ -38,11 +39,20 @@ namespace Api
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseMiddleware<ExceptionMiddleware>();
+            app.UseXContentTypeOptions();
+            app.UseReferrerPolicy(opt => opt.NoReferrer());
+            app.UseXXssProtection(opt => opt.EnabledWithBlockMode());
+            app.UseXfo(opt => opt.Deny());
+            app.UseCsp(opt => opt
+                .BlockAllMixedContent()
+                .FrameAncestors(s => s.Self())
+            );
+
             app.UseRouting();
 
             app.UseDefaultFiles();
             app.UseStaticFiles();
-            
+
             app.UseCors("CorsPolicy");
             app.UseSwagger();
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Reactivities API"); });
