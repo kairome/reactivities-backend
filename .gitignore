@@ -11,3 +11,4 @@ publish/
 wwwroot/
 /app
 appsettings.Production.json
+appsettings.Development.json
