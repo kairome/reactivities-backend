@@ -29,6 +29,7 @@ namespace Api.Controllers
             options.Expires = AuthConfigs.TokenExpiryDate;
             options.Secure = false;
             options.HttpOnly = true;
+            
             options.SameSite = SameSiteMode.Strict;
             Response.Cookies.Append(AuthConfigs.AuthCookieName, token, options);
             return userDto;
