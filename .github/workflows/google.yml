@@ -18,12 +18,11 @@ on:
       - '*'
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
-  GKE_CLUSTER: reactivities
-  GKE_ZONE: europe-west3-b
-  DEPLOYMENT_NAME: backend
   REPO_NAME: reactivities
   IMAGE: backend
-
+  INSTANCE_NAME: reactivities1
+  ZONE: europe-west4-a
+  
 jobs:
   setup-build-publish-deploy:
     name: Setup, Build, Publish, and Deploy
@@ -46,18 +45,11 @@ jobs:
     - run: |-
         gcloud --quiet auth configure-docker europe-docker.pkg.dev
 
-    # Get the GKE credentials so we can deploy to the cluster
-    - uses: google-github-actions/get-gke-credentials@v0.2.1
-      with:
-        cluster_name: ${{ env.GKE_CLUSTER }}
-        location: ${{ env.GKE_ZONE }}
-        credentials: ${{ secrets.GKE_SA_KEY }}
-
     # Build the Docker image
     - name: Build
       run: |-
         docker build \
-          --tag "europe-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE:$GITHUB_SHA" \
+          --tag "europe-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE:latest" \
           --build-arg GITHUB_SHA="$GITHUB_SHA" \
           --build-arg GITHUB_REF="$GITHUB_REF" \
           .
@@ -65,10 +57,10 @@ jobs:
     # Push the Docker image to Google Container Registry
     - name: Publish
       run: |-
-        docker push "europe-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE:$GITHUB_SHA"
+        docker push "europe-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE:latest"
 
     # Deploy the Docker image to the GKE cluster
     - name: Deploy
       run: |-
-        kubectl set image deployment/$IMAGE $IMAGE=europe-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE:$GITHUB_SHA
+        gcloud compute ssh --zone $ZONE $INSTANCE_NAME --command 'cd /deploy && sudo docker-compose down && sudo docker-compose up -d'
 
