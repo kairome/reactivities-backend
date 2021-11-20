@@ -26,7 +26,7 @@ namespace Api.Controllers
             var (userDto, token) = await _authenticationService.Login(loginDto);
 
             var options = new CookieOptions();
-            options.Expires = AuthConfigs.TokenExpiryDate;
+            options.Expires = AuthConfigs.GetTokenExpiryDate();
             options.Secure = false;
             options.HttpOnly = true;
             

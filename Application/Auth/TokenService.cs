@@ -43,7 +43,7 @@ namespace Application.Auth
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = AuthConfigs.TokenExpiryDate,
+                Expires = AuthConfigs.GetTokenExpiryDate(),
                 SigningCredentials = creds
             };
 
