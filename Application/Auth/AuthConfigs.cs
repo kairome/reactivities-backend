@@ -8,7 +8,7 @@ namespace Application.Auth
 
         public static DateTime GetTokenExpiryDate()
         {
-            return DateTime.UtcNow.AddMinutes(3);
+            return DateTime.UtcNow.AddDays(3);
         }
             
     }
